@@ -39,7 +39,7 @@ Terminal UI for browsing and resuming [Claude Code](https://docs.anthropic.com/e
 ## Installation
 
 ```bash
-git clone https://github.com/jcd79/claude-sessions.git
+git clone https://github.com/damiancioo/claude-sessions.git
 cd claude-sessions
 npm install
 npm link
