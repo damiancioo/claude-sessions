@@ -8,7 +8,7 @@ import { computeLayout, computeColumns } from './layout.js';
  */
 export function renderScreen(state) {
   const { sessions, filteredSessions, selectedIndex, scrollOffset,
-          searchMode, searchText, sortIndex, statusMessage } = state;
+          searchMode, searchText, sortIndex, statusMessage, bypassPermissions } = state;
 
   const termCols = process.stdout.columns || 80;
   const termRows = process.stdout.rows || 24;
@@ -42,7 +42,7 @@ export function renderScreen(state) {
 
   // Bottom separator + status bar
   lines.push(renderSeparator(termCols));
-  lines.push(renderStatusBar(termCols, currentPage, totalPages, statusMessage));
+  lines.push(renderStatusBar(termCols, currentPage, totalPages, statusMessage, bypassPermissions));
 
   return lines.join('\n');
 }

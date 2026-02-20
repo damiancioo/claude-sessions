@@ -1,5 +1,6 @@
 import { loadAllSessions } from './data/loader.js';
 import { readCache, writeCache } from './data/cache.js';
+import { readConfig, writeConfig } from './data/config.js';
 import { paintScreen } from './ui/renderer.js';
 import { computeLayout } from './ui/layout.js';
 import { setupKeyboard } from './input/keyboard.js';
@@ -22,6 +23,7 @@ function createState() {
     sortIndex: 0,            // 0=date, 1=messages, 2=repo, 3=branch
     statusMessage: '',
     running: true,
+    bypassPermissions: false, // whether to pass --dangerously-skip-permissions on launch
   };
 }
 
@@ -212,13 +214,19 @@ function handleAction(action, state, key, cleanupKeyboard) {
       });
       return; // async, don't paint now
 
+    case 'toggle-bypass':
+      state.bypassPermissions = !state.bypassPermissions;
+      writeConfig({ bypassPermissions: state.bypassPermissions });
+      flashStatus(state, `Bypass permissions: ${state.bypassPermissions ? 'On' : 'Off'}`);
+      return; // flashStatus already paints
+
     case 'launch': {
       const session = visible[state.selectedIndex];
       if (!session) break;
       const result = launchSession(session, () => {
         cleanupKeyboard();
         exitAltScreen();
-      });
+      }, state.bypassPermissions);
       if (result.method === 'windows-terminal') {
         flashStatus(state, `Launched in new tab: ${session.repoName}`);
         return;
@@ -243,6 +251,12 @@ function handleAction(action, state, key, cleanupKeyboard) {
  */
 export async function run() {
   const state = createState();
+
+  // Load persistent config
+  const config = await readConfig();
+  if (typeof config.bypassPermissions === 'boolean') {
+    state.bypassPermissions = config.bypassPermissions;
+  }
 
   // Load data: try cache first, then disk
   const cached = await readCache();

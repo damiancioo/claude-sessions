@@ -6,21 +6,23 @@ import { detectTerminal } from './terminal-detect.js';
  * On Windows Terminal: opens a new tab.
  * Otherwise: exits alt screen and runs claude in the current terminal.
  */
-export function launchSession(session, exitAltScreen) {
+export function launchSession(session, exitAltScreen, bypassPermissions) {
   const { sessionId, projectPath, repoName, gitBranch } = session;
   const terminal = detectTerminal();
   const title = `Claude: ${repoName}@${gitBranch}`;
 
   if (terminal === 'windows-terminal') {
-    return launchWindowsTerminal(sessionId, projectPath, title, exitAltScreen);
+    return launchWindowsTerminal(sessionId, projectPath, title, exitAltScreen, bypassPermissions);
   }
 
   // Fallback: run in current terminal
-  return launchInPlace(sessionId, projectPath, exitAltScreen);
+  return launchInPlace(sessionId, projectPath, exitAltScreen, bypassPermissions);
 }
 
-function launchWindowsTerminal(sessionId, projectPath, title, exitAltScreen) {
-  const claudeCmd = `claude --resume ${sessionId} --dangerously-skip-permissions`;
+function launchWindowsTerminal(sessionId, projectPath, title, exitAltScreen, bypassPermissions) {
+  const claudeCmd = bypassPermissions
+    ? `claude --resume ${sessionId} --dangerously-skip-permissions`
+    : `claude --resume ${sessionId}`;
 
   // Use wt.exe to open a new tab
   const args = [
@@ -40,15 +42,17 @@ function launchWindowsTerminal(sessionId, projectPath, title, exitAltScreen) {
     return { success: true, method: 'windows-terminal' };
   } catch (err) {
     // Fall back to in-place launch
-    return launchInPlace(sessionId, projectPath, exitAltScreen);
+    return launchInPlace(sessionId, projectPath, exitAltScreen, bypassPermissions);
   }
 }
 
-function launchInPlace(sessionId, projectPath, exitAltScreen) {
+function launchInPlace(sessionId, projectPath, exitAltScreen, bypassPermissions) {
   // Exit alternate screen and restore terminal
   exitAltScreen();
 
-  const args = ['--resume', sessionId, '--dangerously-skip-permissions'];
+  const args = bypassPermissions
+    ? ['--resume', sessionId, '--dangerously-skip-permissions']
+    : ['--resume', sessionId];
 
   try {
     const child = spawn('claude', args, {

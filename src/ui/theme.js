@@ -109,10 +109,14 @@ function keyHint(key, desc) {
 /**
  * Render status bar with colored keybindings.
  */
-export function renderStatusBar(width, page, totalPages, statusMessage) {
+export function renderStatusBar(width, page, totalPages, statusMessage, bypassPermissions) {
   if (statusMessage) {
     return ' ' + statusHighlight(statusMessage);
   }
+
+  const bypassHint = bypassPermissions
+    ? keyStyle('B', 'Bypass: On')
+    : keyHint('B', 'Bypass: Off');
 
   const hints = [
     keyHint('↑↓', 'Navigate'),
@@ -121,6 +125,7 @@ export function renderStatusBar(width, page, totalPages, statusMessage) {
     keyHint('S', 'Sort'),
     keyHint('R', 'Refresh'),
     keyHint('Q', 'Quit'),
+    bypassHint,
   ];
   const left = ' ' + hints.join(descStyle('  '));
   const pageStr = descStyle(`pg ${page}/${totalPages}`);
