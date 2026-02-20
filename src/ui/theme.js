@@ -115,7 +115,7 @@ export function renderStatusBar(width, page, totalPages, statusMessage, bypassPe
   }
 
   const bypassHint = bypassPermissions
-    ? keyStyle('B', 'Bypass: On')
+    ? keyHint('B', 'Bypass: On')
     : keyHint('B', 'Bypass: Off');
 
   const hints = [
