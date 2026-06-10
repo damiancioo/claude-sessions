@@ -3,6 +3,7 @@ import chalk from 'chalk';
 // Column colors — tailwind-inspired palette
 export const repoColor = chalk.hex('#60a5fa');       // soft blue
 export const branchColor = chalk.hex('#34d399');     // emerald
+export const titleColor = chalk.hex('#5eead4');      // teal
 export const promptColor = chalk.hex('#9ca3af');     // gray-400
 export const dateColor = chalk.hex('#fbbf24');       // amber
 export const msgColor = chalk.hex('#f472b6');        // pink
@@ -109,7 +110,7 @@ function keyHint(key, desc) {
 /**
  * Render status bar with colored keybindings.
  */
-export function renderStatusBar(width, page, totalPages, statusMessage, bypassPermissions) {
+export function renderStatusBar(width, page, totalPages, statusMessage, bypassPermissions, showPrompt) {
   if (statusMessage) {
     return ' ' + statusHighlight(statusMessage);
   }
@@ -118,6 +119,8 @@ export function renderStatusBar(width, page, totalPages, statusMessage, bypassPe
     ? keyHint('B', 'Bypass: On')
     : keyHint('B', 'Bypass: Off');
 
+  const promptHint = keyHint('P', `Prompt: ${showPrompt ? 'On' : 'Off'}`);
+
   const hints = [
     keyHint('↑↓', 'Navigate'),
     keyHint('Enter', 'Launch'),
@@ -125,6 +128,7 @@ export function renderStatusBar(width, page, totalPages, statusMessage, bypassPe
     keyHint('S', 'Sort'),
     keyHint('R', 'Refresh'),
     keyHint('Q', 'Quit'),
+    promptHint,
     bypassHint,
   ];
   const left = ' ' + hints.join(descStyle('  '));

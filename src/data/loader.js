@@ -80,6 +80,8 @@ async function parseJsonlSession(filePath, dirName) {
     let gitBranch = '';
     let firstPrompt = '';
     let firstTimestamp = '';
+    let customTitle = '';
+    let aiTitle = '';
 
     for (const line of lines) {
       try {
@@ -129,6 +131,16 @@ async function parseJsonlSession(filePath, dirName) {
       // Quick check without full JSON parse
       if (l.includes('"type":"user"') || l.includes('"type":"assistant"')) {
         messageCount++;
+      } else if (l.includes('"type":"custom-title"') || l.includes('"type":"ai-title"')) {
+        // Title records are appended (and re-appended) throughout the file;
+        // the last occurrence of each wins.
+        try {
+          const obj = JSON.parse(l);
+          if (obj.type === 'custom-title' && obj.customTitle) customTitle = obj.customTitle;
+          else if (obj.type === 'ai-title' && obj.aiTitle) aiTitle = obj.aiTitle;
+        } catch {
+          // ignore malformed title line
+        }
       }
     }
 
@@ -137,6 +149,8 @@ async function parseJsonlSession(filePath, dirName) {
       projectPath,
       gitBranch,
       firstPrompt,
+      customTitle,
+      aiTitle,
       messageCount,
       created: firstTimestamp || fileStat.birthtime.toISOString(),
       modified: fileStat.mtime.toISOString(),

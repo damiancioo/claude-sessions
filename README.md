@@ -8,21 +8,22 @@ Terminal UI for browsing and resuming [Claude Code](https://docs.anthropic.com/e
 ╰────────────────────────────────────────────────────────────────────────────────────────────╯
  🔍 Search: _                                                                    Sort: Date ▾
 
-  REPO             BRANCH              FIRST PROMPT                             DATE     MSG
+  REPO             BRANCH              TITLE                                    DATE     MSG
 ─────────────────────────────────────────────────────────────────────────────────────────────
-▸ my-app           feat/auth           Add OAuth2 login flow..                  2h ago    12
-  my-app           develop             Fix the build error..                    1d ago    66
-  api-service      main                Update the identity..                    3d ago     8
-  website          feat/dark-mode      Implement dark theme..                   5d ago    24
+▸ my-app           feat/auth           Add OAuth2 login flow                    2h ago    12
+  my-app           develop             Fix the production build error           1d ago    66
+  api-service      main                Refactor the identity service            3d ago     8
+  website          feat/dark-mode      Implement the dark theme                 5d ago    24
 
 ─────────────────────────────────────────────────────────────────────────────────────────────
- ↑↓ Navigate  Enter Launch  / Search  S Sort  R Refresh  Q Quit  B Bypass: Off       pg 1/10
+ ↑↓ Navigate  Enter Launch  / Search  S Sort  R Refresh  Q Quit  P Prompt: Off  B Bypass: Off
 ```
 
 ## Features
 
 - **Browse all sessions** — Scans every `sessions-index.json` + orphan `.jsonl` files in `~/.claude/projects/`
-- **Fuzzy search** — Press `/` and type to filter by repo, branch, prompt, or project path
+- **Session titles** — Shows the title you set when renaming a chat in Claude Code, falling back to Claude's auto-generated title. Press `P` to also show the original first prompt
+- **Fuzzy search** — Press `/` and type to filter by title, repo, branch, prompt, or project path
 - **Sortable** — Cycle through Date / Messages / Repo / Branch with `S`
 - **Instant resume** — Press `Enter` to launch `claude --resume <id>` (optionally with `--dangerously-skip-permissions`, see below)
 - **Bypass permissions toggle** — Press `B` to toggle `--dangerously-skip-permissions` on/off; state is saved to `~/.claude-sessions-config.json` and restored on next launch
@@ -48,10 +49,10 @@ npm link
 
 After `npm link`, two commands are available globally:
 
-| Command | Description |
-|---------|-------------|
-| `claude-sessions` | Full name |
-| `cs` | Short alias |
+| Command           | Description |
+|-------------------|-------------|
+| `claude-sessions` | Full name   |
+| `cs`              | Short alias |
 
 Open any terminal and type `cs` to launch.
 
@@ -65,20 +66,21 @@ npm unlink -g claude-sessions
 
 ### Keyboard shortcuts
 
-| Key | Action |
-|-----|--------|
-| `↑` / `k` | Move up |
-| `↓` / `j` | Move down |
-| `PgUp` / `PgDn` | Scroll by page |
-| `Home` / `g` | Jump to top |
-| `End` / `G` | Jump to bottom |
-| `Enter` | Resume selected session |
-| `/` | Start searching |
-| `Esc` | Exit search mode |
-| `S` | Cycle sort mode |
-| `R` | Refresh sessions from disk |
-| `B` | Toggle bypass permissions mode (On/Off) |
-| `Q` / `Ctrl+C` | Quit |
+| Key             | Action                                  |
+|-----------------|-----------------------------------------|
+| `↑` / `k`       | Move up                                 |
+| `↓` / `j`       | Move down                               |
+| `PgUp` / `PgDn` | Scroll by page                          |
+| `Home` / `g`    | Jump to top                             |
+| `End` / `G`     | Jump to bottom                          |
+| `Enter`         | Resume selected session                 |
+| `/`             | Start searching                         |
+| `Esc`           | Exit search mode                        |
+| `S`             | Cycle sort mode                         |
+| `R`             | Refresh sessions from disk              |
+| `P`             | Toggle the FIRST PROMPT column (On/Off) |
+| `B`             | Toggle bypass permissions mode (On/Off) |
+| `Q` / `Ctrl+C`  | Quit                                    |
 
 ### How it finds sessions
 
@@ -102,18 +104,24 @@ When you press `Enter` on a session:
 
 Press `B` at any time to toggle whether sessions are launched with `--dangerously-skip-permissions`.
 
-| State | Status bar | Launch command |
-|-------|-----------|----------------|
-| Off (default) | `B Bypass: Off` | `claude --resume <id>` |
-| On | `B Bypass: On` (orange) | `claude --resume <id> --dangerously-skip-permissions` |
+| State         | Status bar              | Launch command                                        |
+|---------------|-------------------------|-------------------------------------------------------|
+| Off (default) | `B Bypass: Off`         | `claude --resume <id>`                                |
+| On            | `B Bypass: On` (orange) | `claude --resume <id> --dangerously-skip-permissions` |
 
 The setting is persisted to `~/.claude-sessions-config.json` and restored automatically on next launch.
+
+### Title column
+
+The **TITLE** column shows the name of the session. When you rename a chat in Claude Code, the new name is written to the session's `.jsonl` as a `custom-title` record — that is shown first. If a session was never renamed, Claude's auto-generated `ai-title` is shown instead. Sessions with neither show a blank title.
+
+The original first user message lives in the **FIRST PROMPT** column, which is hidden by default. Press `P` to show it alongside the title; the choice is saved to `~/.claude-sessions-config.json` and restored on next launch.
 
 ### Caching
 
 On first launch, the app reads all session index files from disk and writes a merged cache to `~/.claude-sessions-cache.json`. On subsequent launches (within 5 minutes), it loads from cache instantly and refreshes in the background. Press `R` to force a refresh.
 
-User preferences (bypass permissions state) are stored separately in `~/.claude-sessions-config.json` with no expiry.
+User preferences (bypass permissions state, first-prompt column visibility) are stored separately in `~/.claude-sessions-config.json` with no expiry.
 
 ## How it's built
 
@@ -121,10 +129,10 @@ Zero build step. Plain ES modules (`.js` files with `"type": "module"` in `packa
 
 **Dependencies** (just 2):
 
-| Package | Purpose |
-|---------|---------|
-| [chalk](https://github.com/chalk/chalk) | Terminal colors and styling |
-| [fuse.js](https://github.com/krisk/Fuse) | Fuzzy search |
+| Package                                  | Purpose                     |
+|------------------------------------------|-----------------------------|
+| [chalk](https://github.com/chalk/chalk)  | Terminal colors and styling |
+| [fuse.js](https://github.com/krisk/Fuse) | Fuzzy search                |
 
 Everything else — keyboard input, screen rendering, layout — uses Node.js built-ins (`readline`, ANSI escape sequences, alternate screen buffer).
 

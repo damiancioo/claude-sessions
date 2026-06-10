@@ -5,7 +5,8 @@ let lastSessions = null;
 
 const FUSE_OPTIONS = {
   keys: [
-    { name: 'firstPrompt', weight: 0.40 },
+    { name: 'title', weight: 0.40 },
+    { name: 'firstPrompt', weight: 0.35 },
     { name: 'repoName', weight: 0.25 },
     { name: 'gitBranch', weight: 0.20 },
     { name: 'projectPath', weight: 0.15 },

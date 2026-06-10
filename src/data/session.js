@@ -33,11 +33,16 @@ function cleanPrompt(raw) {
  * Normalize a raw session entry from sessions-index.json into our internal model.
  */
 export function normalizeSession(entry, sourceFile) {
+  // Title: prefer the user's manual rename (custom-title), fall back to the
+  // auto-generated ai-title. Blank when the session was never titled.
+  const title = (entry.customTitle || entry.aiTitle || entry.title || '').trim();
+
   return {
     sessionId: entry.sessionId || '',
     projectPath: entry.projectPath || '',
     repoName: extractRepoName(entry.projectPath),
     gitBranch: entry.gitBranch || '(none)',
+    title,
     firstPrompt: cleanPrompt(entry.firstPrompt),
     messageCount: entry.messageCount || 0,
     created: entry.created || '',

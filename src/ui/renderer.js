@@ -8,12 +8,13 @@ import { computeLayout, computeColumns } from './layout.js';
  */
 export function renderScreen(state) {
   const { sessions, filteredSessions, selectedIndex, scrollOffset,
-          searchMode, searchText, sortIndex, statusMessage, bypassPermissions } = state;
+          searchMode, searchText, sortIndex, statusMessage, bypassPermissions,
+          showPrompt } = state;
 
   const termCols = process.stdout.columns || 80;
   const termRows = process.stdout.rows || 24;
   const layout = computeLayout(termRows, termCols);
-  const columns = computeColumns(termCols);
+  const columns = computeColumns(termCols, showPrompt);
 
   const displaySessions = filteredSessions || sessions;
   const totalSessions = displaySessions.length;
@@ -42,7 +43,7 @@ export function renderScreen(state) {
 
   // Bottom separator + status bar
   lines.push(renderSeparator(termCols));
-  lines.push(renderStatusBar(termCols, currentPage, totalPages, statusMessage, bypassPermissions));
+  lines.push(renderStatusBar(termCols, currentPage, totalPages, statusMessage, bypassPermissions, showPrompt));
 
   return lines.join('\n');
 }

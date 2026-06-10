@@ -45,6 +45,7 @@ export function resolveAction(key, searchMode) {
   if (sequence === 'g') return 'go-home';
   if (sequence === 'G') return 'go-end';
   if (sequence === 'b' || sequence === 'B') return 'toggle-bypass';
+  if (sequence === 'p' || sequence === 'P') return 'toggle-prompt';
 
   return null;
 }

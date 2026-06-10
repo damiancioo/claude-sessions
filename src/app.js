@@ -24,6 +24,7 @@ function createState() {
     statusMessage: '',
     running: true,
     bypassPermissions: false, // whether to pass --dangerously-skip-permissions on launch
+    showPrompt: false,        // whether the FIRST PROMPT column is shown (toggle with P)
   };
 }
 
@@ -220,6 +221,12 @@ function handleAction(action, state, key, cleanupKeyboard) {
       flashStatus(state, `Bypass permissions: ${state.bypassPermissions ? 'On' : 'Off'}`);
       return; // flashStatus already paints
 
+    case 'toggle-prompt':
+      state.showPrompt = !state.showPrompt;
+      writeConfig({ showPrompt: state.showPrompt });
+      flashStatus(state, `First prompt column: ${state.showPrompt ? 'On' : 'Off'}`);
+      return; // flashStatus already paints
+
     case 'launch': {
       const session = visible[state.selectedIndex];
       if (!session) break;
@@ -256,6 +263,9 @@ export async function run() {
   const config = await readConfig();
   if (typeof config.bypassPermissions === 'boolean') {
     state.bypassPermissions = config.bypassPermissions;
+  }
+  if (typeof config.showPrompt === 'boolean') {
+    state.showPrompt = config.showPrompt;
   }
 
   // Load data: try cache first, then disk

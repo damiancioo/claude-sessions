@@ -23,23 +23,43 @@ export function computeLayout(termRows, termCols) {
 
 /**
  * Compute column widths given terminal width.
+ * When showPrompt is true, the FIRST PROMPT column is shown alongside TITLE,
+ * splitting the flexible space between them; otherwise TITLE takes it all.
  */
-export function computeColumns(termCols) {
-  // Reserve space: indicator(2) + gaps between columns(4 spaces for 5 cols)
-  const available = termCols - 2 - 4;
+export function computeColumns(termCols, showPrompt = false) {
+  // Columns: indicator + repo + branch + title [+ prompt] + date + msg.
+  // One space gap sits between each pair of columns.
+  const numCols = showPrompt ? 6 : 5;
+  const gaps = numCols - 1;
+  const available = termCols - 2 - gaps;
 
-  // Proportions: repo=18%, branch=18%, prompt=40%, date=12%, msg=6%
+  // Fixed/proportional columns, flexible space goes to title (+ prompt).
   const repoW = Math.max(Math.floor(available * 0.16), 8);
   const branchW = Math.max(Math.floor(available * 0.18), 8);
   const dateW = Math.max(8, 8);
   const msgW = Math.max(4, 4);
-  const promptW = Math.max(available - repoW - branchW - dateW - msgW, 10);
+  const flexW = Math.max(available - repoW - branchW - dateW - msgW, 10);
 
-  return [
+  const columns = [
     { key: 'repoName', header: 'REPO', width: repoW },
     { key: 'gitBranch', header: 'BRANCH', width: branchW },
-    { key: 'firstPrompt', header: 'FIRST PROMPT', width: promptW },
+  ];
+
+  if (showPrompt) {
+    const titleW = Math.max(Math.floor(flexW / 2), 10);
+    const promptW = Math.max(flexW - titleW, 10);
+    columns.push(
+      { key: 'title', header: 'TITLE', width: titleW },
+      { key: 'firstPrompt', header: 'FIRST PROMPT', width: promptW },
+    );
+  } else {
+    columns.push({ key: 'title', header: 'TITLE', width: flexW });
+  }
+
+  columns.push(
     { key: 'modified', header: 'DATE', width: dateW, isDate: true },
     { key: 'messageCount', header: 'MSG', width: msgW, isNumber: true },
-  ];
+  );
+
+  return columns;
 }

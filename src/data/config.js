@@ -18,12 +18,15 @@ export async function readConfig() {
 }
 
 /**
- * Write persistent user config.
+ * Write persistent user config, merging into any existing config so callers
+ * can update a single key without clobbering the others.
  * Write failure is non-fatal.
  */
 export async function writeConfig(config) {
   try {
-    await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
+    const existing = await readConfig();
+    const merged = { ...existing, ...config };
+    await writeFile(CONFIG_PATH, JSON.stringify(merged, null, 2), 'utf-8');
   } catch {
     // Config write failure is non-fatal
   }

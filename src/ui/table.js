@@ -1,13 +1,14 @@
 import { truncate, padRight, padLeft } from '../utils/text.js';
 import { relativeDate } from '../utils/date.js';
 import {
-  repoColor, branchColor, promptColor, dateColor, msgColor,
+  repoColor, branchColor, titleColor, promptColor, dateColor, msgColor,
   selectedBg, indicator, normalIndicator, dimText,
 } from './theme.js';
 
 const colorFns = {
   repoName: repoColor,
   gitBranch: branchColor,
+  title: titleColor,
   firstPrompt: promptColor,
   modified: dateColor,
   messageCount: msgColor,
